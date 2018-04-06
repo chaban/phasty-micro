@@ -1,0 +1,3 @@
+*.conf
+!default.conf
+!centrifugo.conf

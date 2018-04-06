@@ -1,0 +1,94 @@
+version: "2"
+
+services:
+  applications:
+      image: tianon/true
+      volumes:
+        - ${PWD}/phalcon:/application
+
+  webserver:
+    build:
+      context: ${PWD}/docker/nginx
+      args:
+        - PHP_UPSTREAM_CONTAINER=php-fpm
+        - PHP_UPSTREAM_PORT=9000
+    container_name: nginx_
+    working_dir: /application
+    volumes_from:
+        - applications
+    volumes:
+        - ${PWD}/docker/nginx/logs:/var/log/nginx
+        - ${PWD}/docker/nginx/sites:/etc/nginx/sites-available
+    ports:
+     - "80:80"
+     - "443:443"
+    env_file:
+      - .env
+    depends_on:
+      - php-fpm
+    networks:
+      - frontend
+      - backend
+
+  php-fpm:
+    build: docker/php-fpm
+    container_name: php_
+    working_dir: /application
+    volumes_from:
+        - applications
+    volumes:
+      - ${PWD}/docker/php-fpm/php-ini-overrides.ini:/etc/php/7.2/fpm/conf.d/99-overrides.ini
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - backend
+
+  postgres:
+    restart: always
+    image: postgres:alpine
+    container_name: postgres_
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - ${PWD}/docker/dbdata/pgdata:/var/lib/postgresql/phasty
+    networks:
+      - backend
+
+  redis:
+    build: ${PWD}/docker/redis
+    container_name: redis_
+    volumes:
+      - ${PWD}/docker/dbdata/redis:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+  centrifugo:
+    container_name: centrifugo_
+    image: centrifugo/centrifugo
+    command: centrifugo --engine=redis --redis_api -w --port=8000 --debug --insecure --address=0.0.0.0 --log_file=debug.log
+    ports:
+      - "7000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ${PWD}/docker/centrifugo:/centrifugo   # centrifugo -c config.json -w /opt/centrifugo/web
+    depends_on:
+      - redis
+      - webserver
+    networks:
+      - backend
+
+
+
+networks:
+    frontend:
+        driver: "bridge"
+    backend:
+        driver: "bridge"

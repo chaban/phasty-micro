@@ -1,0 +1,32 @@
+{
+  "name": "phasty-micro",
+  "description": "Shopping cart on phalcon php framework.",
+  "keywords": [
+    "shopping cart",
+    "phalcon"
+  ],
+  "require": {
+    "league/fractal": "^0.17.0",
+    "paragonie/easydb": "^2",
+    "league/pipeline": "^0.3.0",
+    "paragonie/paseto": "^0.5.0",
+    "vlucas/phpdotenv": "^2.4",
+    "nesbot/carbon": "^1.24",
+    "tightenco/collect": "^5.6",
+    "oleh-ozimok/php-centrifugo": "^1.0"
+  },
+  "require-dev": {
+    "phalcon/dd": "^1.1",
+    "robmorgan/phinx": "^0.9",
+    "fzaninotto/faker": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "Phasty\\": "app"
+    }
+  },
+  "config": {
+    "preferred-install": "dist"
+  },
+  "minimum-stability": "stable"
+}
